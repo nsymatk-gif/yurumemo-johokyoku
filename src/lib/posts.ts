@@ -39,6 +39,16 @@ export function getAllPosts(): Post[] {
   return posts.sort((a, b) => (a.date < b.date ? 1 : -1))
 }
 
+export function getAdjacentPosts(slug: string): { prev: Post | null; next: Post | null } {
+  const posts = getAllPosts() // sorted newest first
+  const index = posts.findIndex((p) => p.slug === slug)
+  if (index === -1) return { prev: null, next: null }
+  return {
+    prev: posts[index + 1] ?? null, // older
+    next: posts[index - 1] ?? null, // newer
+  }
+}
+
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   const fullPath = path.join(postsDirectory, `${slug}.md`)
   if (!fs.existsSync(fullPath)) return null

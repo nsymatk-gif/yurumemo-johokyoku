@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getAllPosts, getPostBySlug } from '@/lib/posts'
+import { getAllPosts, getPostBySlug, getAdjacentPosts } from '@/lib/posts'
 import type { Metadata } from 'next'
 
 export async function generateStaticParams() {
@@ -19,6 +19,8 @@ export default async function PostPage(props: PageProps<'/posts/[slug]'>) {
   const { slug } = await props.params
   const post = await getPostBySlug(slug)
   if (!post) notFound()
+
+  const { prev, next } = getAdjacentPosts(slug)
 
   return (
     <article>
@@ -59,6 +61,36 @@ export default async function PostPage(props: PageProps<'/posts/[slug]'>) {
         style={{ color: '#333333' }}
         dangerouslySetInnerHTML={{ __html: post.contentHtml ?? '' }}
       />
+
+      <nav
+        className="mt-16 pt-8 flex justify-between gap-4 text-sm"
+        style={{ borderTop: '1px solid #E0DDD8' }}
+      >
+        <div className="flex-1">
+          {prev && (
+            <Link
+              href={`/posts/${prev.slug}`}
+              className="group flex flex-col gap-1 transition-colors hover:text-[#3B7A57]"
+              style={{ color: '#555555' }}
+            >
+              <span className="text-xs" style={{ color: '#AAAAAA' }}>← 前の記事</span>
+              <span className="font-medium leading-snug group-hover:underline">{prev.title}</span>
+            </Link>
+          )}
+        </div>
+        <div className="flex-1 text-right">
+          {next && (
+            <Link
+              href={`/posts/${next.slug}`}
+              className="group flex flex-col gap-1 items-end transition-colors hover:text-[#3B7A57]"
+              style={{ color: '#555555' }}
+            >
+              <span className="text-xs" style={{ color: '#AAAAAA' }}>次の記事 →</span>
+              <span className="font-medium leading-snug group-hover:underline">{next.title}</span>
+            </Link>
+          )}
+        </div>
+      </nav>
     </article>
   )
 }
